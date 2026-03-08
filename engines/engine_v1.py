@@ -5,7 +5,8 @@ ENGINE_VERSION = "1.0.0"
 ENGINE_NAME = "Baseline Auto Rating Model"
 
 def calculate_premium(age: int, vehicle_value: float,
-                        zip_code: str, coverage: str) -> dict:
+                        zip_code: str, coverage: str,
+                        vehicle_color: str = "") -> dict:
     """
     Simple actuarial rating engine.
     Returns premium breakdown.
@@ -37,6 +38,7 @@ def calculate_premium(age: int, vehicle_value: float,
             "base": base_rate,
             "age": age_factor,
             "vehicle": round(value_factor, 3),
-            "coverage": cov_factor
+            "coverage": cov_factor,
+            "vehicle_color": 1.0
         }
     }
