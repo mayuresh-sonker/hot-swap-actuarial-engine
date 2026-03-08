@@ -31,6 +31,7 @@ class QuoteRequest(BaseModel):
     vehicle_value: float = 35000
     zip_code: str = "90210"
     coverage: str = "collision"
+    vehicle_color: str | None = None
 
 # ── API endpoints ────────────────────────────────────
 @app.post("/quote")
@@ -38,7 +39,11 @@ async def get_quote(req: QuoteRequest):
     with _engine_lock:
         engine = _active_engine
     result = engine.calculate_premium(
-        req.age, req.vehicle_value, req.zip_code, req.coverage
+        req.age,
+        req.vehicle_value,
+        req.zip_code,
+        req.coverage,
+        req.vehicle_color or "",
     )
     result["request"] = req.model_dump()
     return result
@@ -91,7 +96,7 @@ async function quote(){
   const r=await fetch('/quote',{method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({age:23,vehicle_value:28000,
-      zip_code:'33101',coverage:'comprehensive'})});
+      zip_code:'33101',coverage:'comprehensive',vehicle_color:'red'})});
   const d=await r.json();
   document.getElementById('out').textContent=JSON.stringify(d,null,2);}
 status();
