@@ -8,7 +8,8 @@ ENGINE_NAME = "CAT-Adjusted Florida Model"
 HIGH_RISK_ZIPS = {"33101", "33109", "34102", "32801"}
 
 def calculate_premium(age: int, vehicle_value: float,
-                        zip_code: str, coverage: str) -> dict:
+                        zip_code: str, coverage: str,
+                        vehicle_color: str = "") -> dict:
     """
     CAT-adjusted model with geographic surcharges.
     Replaces v1 after catastrophe event.
@@ -29,7 +30,21 @@ def calculate_premium(age: int, vehicle_value: float,
     # NEW: Geographic CAT surcharge
     geo_factor = 1.45 if zip_code in HIGH_RISK_ZIPS else 1.0
 
-    annual_premium = base_rate * age_factor * value_factor * cov_factor * geo_factor
+    # NEW: Age band uplift (25–35 adds 15%)
+    age_band_factor = 1.15 if 25 <= age <= 35 else 1.0
+
+    # NEW: Vehicle color uplift (red adds 10%)
+    color_factor = 1.10 if (vehicle_color or "").lower() == "red" else 1.0
+
+    annual_premium = (
+        base_rate
+        * age_factor
+        * value_factor
+        * cov_factor
+        * geo_factor
+        * age_band_factor
+        * color_factor
+    )
 
     return {
         "engine_version": ENGINE_VERSION,
@@ -42,6 +57,8 @@ def calculate_premium(age: int, vehicle_value: float,
             "age": age_factor,
             "vehicle": round(value_factor, 3),
             "coverage": cov_factor,
-            "geographic_cat": geo_factor
+            "geographic_cat": geo_factor,
+            "age_band": age_band_factor,
+            "vehicle_color": color_factor
         }
     }
